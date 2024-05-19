@@ -11,8 +11,8 @@ import { PlaybackService } from 'src/playback/playback.service';
 
 @Injectable()
 @Command({
-  name: 'disconnect',
-  description: 'Join your current voice channel',
+  name: 'leave',
+  description: 'Leave channel and clear the current playlist',
   defaultMemberPermissions,
 })
 export class DisconnectCommand {
@@ -24,7 +24,8 @@ export class DisconnectCommand {
 
   @Handler()
   async handler(@IA() interaction: CommandInteraction): Promise<void> {
-    await interaction.reply({
+    await interaction.deferReply({ ephemeral: true });
+    await interaction.editReply({
       embeds: [
         this.discordMessageService.buildMessage({
           title: 'Disconnecting...',
@@ -49,7 +50,7 @@ export class DisconnectCommand {
     await interaction.editReply({
       embeds: [
         this.discordMessageService.buildMessage({
-          title: 'Disconnected from your channel',
+          title: 'Disconnected.',
         }),
       ],
     });

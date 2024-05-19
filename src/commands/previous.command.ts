@@ -22,8 +22,9 @@ export class PreviousTrackCommand {
 
   @Handler()
   async handler(@IA() interaction: CommandInteraction): Promise<void> {
+    await interaction.deferReply({ ephemeral: true });
     if (!this.playbackService.getPlaylistOrDefault().hasActiveTrack()) {
-      await interaction.reply({
+      await interaction.editReply({
         embeds: [
           this.discordMessageService.buildErrorMessage({
             title: 'There is no previous track',
@@ -34,7 +35,7 @@ export class PreviousTrackCommand {
     }
 
     this.playbackService.getPlaylistOrDefault().setPreviousTrackAsActiveTrack();
-    await interaction.reply({
+    await interaction.editReply({
       embeds: [
         this.discordMessageService.buildMessage({
           title: 'Went to previous track',

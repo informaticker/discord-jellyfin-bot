@@ -11,6 +11,7 @@ import { PlaybackService } from 'src/playback/playback.service';
 import { sleepAsync } from '../../utils/timeUtils';
 import { VolumeCommandParams } from './volume.params';
 import { defaultMemberPermissions } from '../../utils/environment';
+import { time } from 'console';
 
 @Injectable()
 @Command({
@@ -32,7 +33,7 @@ export class VolumeCommand {
     @InteractionEvent(SlashCommandPipe) dto: VolumeCommandParams,
     @IA() interaction: CommandInteraction,
   ): Promise<void> {
-    await interaction.deferReply();
+    await interaction.deferReply({ ephemeral: true });
 
     if (!this.playbackService.getPlaylistOrDefault().hasActiveTrack()) {
       await interaction.editReply({
@@ -54,16 +55,37 @@ export class VolumeCommand {
     );
 
     this.discordVoiceService.changeVolume(volume);
-
+    // Create embed to start volume change
+    await interaction.editReply({
+      embeds: [
+        this.discordMessageService.buildMessage({
+          title: `Changing volume to ${dto.volume.toFixed(0)}%`,
+          description:
+            'This may take a few seconds',
+        }),
+      ],
+    });
     // Discord takes some time to react. Confirmation message should appear after actual change
     await sleepAsync(1500);
-
+    // Warn the user if the volume is too high
+    if (dto.volume > 200) {
+      await interaction.editReply({
+        embeds: [
+          this.discordMessageService.buildMessage({
+            title: `Volume set to ${dto.volume.toFixed(0)}%`,
+            description:
+              'You are playing with fire. Be careful with your ears.',
+          }),
+        ],
+      });
+      return;
+    }
     await interaction.editReply({
       embeds: [
         this.discordMessageService.buildMessage({
           title: `Sucessfully set volume to ${dto.volume.toFixed(0)}%`,
           description:
-            'Updating may take a few seconds to take effect.\nPlease note that listening at a high volume for a long time may damage your hearing',
+            'Take care of your ears.',
         }),
       ],
     });

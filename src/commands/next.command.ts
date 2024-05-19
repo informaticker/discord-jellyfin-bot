@@ -22,8 +22,9 @@ export class SkipTrackCommand {
 
   @Handler()
   async handler(@IA() interaction: CommandInteraction): Promise<void> {
+    await interaction.deferReply({ ephemeral: true });
     if (!this.playbackService.getPlaylistOrDefault().hasActiveTrack()) {
-      await interaction.reply({
+      await interaction.editReply({
         embeds: [
           this.discordMessageService.buildErrorMessage({
             title: 'There is no next track',
@@ -34,10 +35,10 @@ export class SkipTrackCommand {
     }
 
     this.playbackService.getPlaylistOrDefault().setNextTrackAsActiveTrack();
-    await interaction.reply({
+    await interaction.editReply({
       embeds: [
         this.discordMessageService.buildMessage({
-          title: 'Skipped to the next track',
+          title: 'Went to next track',
         }),
       ],
     });

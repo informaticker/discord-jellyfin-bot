@@ -16,15 +16,14 @@ import { Injectable } from '@nestjs/common';
 import { Logger } from '@nestjs/common/services';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Interval } from '@nestjs/schedule';
-
-import { APIEmbed, GuildMember, InteractionEditReplyOptions, InteractionReplyOptions, MessagePayload } from 'discord.js';
+import { APIEmbed, ChannelType, Guild, GuildMember, InteractionEditReplyOptions, InteractionReplyOptions, MessagePayload, VoiceChannel } from 'discord.js';
 
 import { TryResult } from '../../models/TryResult';
 import { Track } from '../../models/music/Track';
 import { PlaybackService } from '../../playback/playback.service';
 import { JellyfinStreamBuilderService } from '../jellyfin/jellyfin.stream.builder.service';
 import { JellyfinWebSocketService } from '../jellyfin/jellyfin.websocket.service';
-
+import { StatusService } from './discord.status.service';
 import { DiscordMessageService } from './discord.message.service';
 
 @Injectable()
@@ -40,8 +39,8 @@ export class DiscordVoiceService {
     private readonly jellyfinWebSocketService: JellyfinWebSocketService,
     private readonly jellyfinStreamBuilder: JellyfinStreamBuilderService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly statusService: StatusService
   ) {}
-
   @OnEvent('internal.audio.track.announce')
   handleOnNewTrack(track: Track) {
     const resource = createAudioResource(
@@ -50,6 +49,9 @@ export class DiscordVoiceService {
         inlineVolume: true,
       },
     );
+    this.statusService.updateStatus(track.name);
+    this.logger.log(track.remoteImages);
+    this.logger.log(`Stream URL: ${track.getStreamUrl(this.jellyfinStreamBuilder)}`);
     this.playResource(resource);
   }
 
@@ -109,6 +111,48 @@ export class DiscordVoiceService {
     };
   }
 
+  async tryJoinChannelByIdAndEstablishVoiceConnection(
+    guild: Guild,
+    channelId: string,
+  ): Promise<TryResult<InteractionReplyOptions>> {
+    const channel = guild.channels.cache.get(channelId) as VoiceChannel;
+    if (!channel || channel.type !== ChannelType.GuildVoice) {
+      return {
+        success: false,
+        reply: {
+          embeds: [
+            this.discordMessageService.buildMessage({
+              title: 'Unable to join the specified channel',
+              description: 'Invalid channel ID or the channel is not a voice channel.',
+            }),
+          ],
+        },
+      };
+    }
+
+    joinVoiceChannel({
+      channelId: channel.id,
+      adapterCreator: channel.guild.voiceAdapterCreator,
+      guildId: channel.guild.id,
+    });
+
+    this.jellyfinWebSocketService.initializeAndConnect();
+
+    if (this.voiceConnection === undefined) {
+      this.voiceConnection = getVoiceConnection(guild.id);
+    }
+    this.voiceConnection?.on(VoiceConnectionStatus.Disconnected, () => {
+      if (this.voiceConnection !== undefined) {
+        const playlist = this.playbackService.getPlaylistOrDefault().clear();
+        this.disconnect();
+      }
+    });
+    return {
+      success: true,
+      reply: {},
+    };
+  }
+
   changeVolume(volume: number) {
     if (!this.audioResource || !this.audioResource.volume) {
       this.logger.error(
@@ -128,7 +172,6 @@ export class DiscordVoiceService {
     this.createAndReturnOrGetAudioPlayer().play(resource);
     this.audioResource = resource;
   }
-
   /**
    * Pauses the current audio player
    */
@@ -153,6 +196,7 @@ export class DiscordVoiceService {
       this.eventEmitter.emit('internal.audio.track.finish', playlist.getActiveTrack());
       playlist.clear();
     }
+    this.statusService.clearStatus();
     return hasStopped;
   }
 
@@ -333,6 +377,7 @@ export class DiscordVoiceService {
 
       if (!hasNextTrack) {
         this.logger.debug('Reached the end of the playlist');
+        this.statusService.clearStatus();
         return;
       }
 

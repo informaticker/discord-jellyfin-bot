@@ -4,7 +4,6 @@ import {
 } from '@jellyfin/sdk/lib/generated-client/models';
 
 import { JellyfinStreamBuilderService } from '../../clients/jellyfin/jellyfin.stream.builder.service';
-
 export class Track {
   /**
    * The identifier of this track, structured as a UID.
@@ -50,7 +49,7 @@ export class Track {
   }
 
   getStreamUrl(streamBuilder: JellyfinStreamBuilderService) {
-    return streamBuilder.buildStreamUrl(this.id, 96000);
+    return streamBuilder.buildStreamUrl(this.id, 320000);
   }
 
   getRemoteImages(): RemoteImageInfo[] {

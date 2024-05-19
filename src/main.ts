@@ -1,8 +1,10 @@
 import { LogLevel } from '@nestjs/common/services';
 import { NestFactory } from '@nestjs/core';
+import { INestApplication } from '@nestjs/common';
 
 import { AppModule } from './app.module';
-import { INestApplication } from '@nestjs/common';
+import { StatusService } from './clients/discord/discord.status.service';
+import { time } from 'console';
 
 function getLoggingLevels(): LogLevel[] {
   if (!process.env.LOG_LEVEL) {
@@ -21,7 +23,7 @@ function getLoggingLevels(): LogLevel[] {
     case 'verbose':
       return ['error', 'warn', 'log', 'debug', 'verbose'];
     default:
-      console.log(`failed to process log level ${process.env.LOG_LEVEL}`);
+      console.log(`Failed to process log level ${process.env.LOG_LEVEL}`);
       return ['error', 'warn', 'log'];
   }
 }
@@ -32,7 +34,14 @@ async function bootstrap() {
   app = await NestFactory.create(AppModule, {
     logger: getLoggingLevels(),
   });
+
+  // Retrieve the StatusService from the app's dependency injector
+  const statusService = app.get(StatusService);
+
+  // Call clearStatus on the StatusService instance
   app.enableShutdownHooks();
-  await app.listen(process.env.PORT || 3000);
+  await app.listen(3002);
+  statusService.clearStatus();
 }
+
 bootstrap();

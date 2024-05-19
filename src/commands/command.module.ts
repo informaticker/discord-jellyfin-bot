@@ -13,7 +13,7 @@ import { PreviousTrackCommand } from './previous.command';
 import { SkipTrackCommand } from './next.command';
 import { StatusCommand } from './status.command';
 import { StopPlaybackCommand } from './stop.command';
-import { SummonCommand } from './summon.command';
+import { SummonCommand } from './summon/summon.commands';
 import { PlaylistInteractionCollector } from './playlist/playlist.interaction-collector';
 import { EnqueueRandomItemsCommand } from './random/random.command';
 import { VolumeCommand } from './volume/volume.command';

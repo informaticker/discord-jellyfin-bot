@@ -1,6 +1,6 @@
 import { DiscordModule } from '@discord-nestjs/core';
 
-import { Logger, Module, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -60,7 +60,6 @@ export class AppModule implements OnModuleInit {
     if (!variables.ALLOW_EVERYONE_FOR_DEFAULT_PERMS) {
       return;
     }
-
     this.logger.warn(
       'WARNING: You are using a potentially dangerous configuration: Everyone on your server has access to your bot. Ensure, that your bot is properly secured. Disable this by setting the environment variable ALLOW_EVERYONE to false',
     );

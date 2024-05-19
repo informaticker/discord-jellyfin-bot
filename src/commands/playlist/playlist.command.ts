@@ -79,7 +79,7 @@ export class PlaylistCommand {
       await interaction.editReply({
         components: [],
       });
-    }, 60 * 1000);
+    }, 360 * 1000);
   }
 
   private getChunks() {
@@ -140,7 +140,7 @@ export class PlaylistCommand {
         embeds: [
           this.discordMessageService.buildMessage({
             title: 'Page does not exist',
-            description: 'Please pass a valid page',
+            description: 'Pass a valid page',
           }),
         ],
         ephemeral: true,

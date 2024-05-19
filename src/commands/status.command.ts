@@ -19,7 +19,7 @@ import { Constants } from '../utils/constants';
 
 @Command({
   name: 'status',
-  description: 'Display the current status for troubleshooting',
+  description: 'Display helpful information.',
   defaultMemberPermissions: 'ViewChannel',
 })
 @Injectable()
@@ -65,7 +65,7 @@ export class StatusCommand {
                 inline: true,
               },
               {
-                name: 'Discord Bot Ping',
+                name: 'Ping to Discord endpoint',
                 value: `${ping}ms`,
                 inline: true,
               },
@@ -78,18 +78,7 @@ export class StatusCommand {
                 name: 'Discord Bot Uptime',
                 value: `${formattedDuration}`,
                 inline: false,
-              },
-              {
-                name: 'Jellyfin Server Version',
-                value: jellyfinSystemInformation.data.Version ?? 'unknown',
-                inline: true,
-              },
-              {
-                name: 'Jellyfin Server Operating System',
-                value:
-                  jellyfinSystemInformation.data.OperatingSystem ?? 'unknown',
-                inline: true,
-              },
+              }
             ]);
           },
         }),

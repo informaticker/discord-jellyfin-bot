@@ -28,8 +28,8 @@ export class JellyfinService {
         version: Constants.Metadata.Version.All(),
       },
       deviceInfo: {
-        id: 'jellyfin-discord-bot',
-        name: 'Jellyfin Discord Bot',
+        id: 'hangout-moosich',
+        name: 'discord-bot',
       },
     });
 
