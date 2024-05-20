@@ -3,36 +3,6 @@
 # Please see the documentation for all configuration options:
 # https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 
-version: 2
-updates:
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/" # Location of package manifests
-    schedule:
-      interval: "weekly"
-    target-branch: "dev"
-    commit-message:
-      prefix: "⬆️" # prefix with gitmoji
-      include: "scope" # list updated dependencies in message
-    assignees:
-      - "manuel-rw"
-  - package-ecosystem: "docker" # See documentation for possible values
-    directory: "/" # Location of package manifests
-    schedule:
-      interval: "weekly"
-    target-branch: "dev"
-    commit-message:
-      prefix: "🚀" # prefix with gitmoji
-      include: "scope" # list updated dependencies in message
-    assignees:
-      - "manuel-rw"
-  - package-ecosystem: "github-actions"
-    directory: /.github
-    schedule:
-     interval: "weekly"
-    target-branch: "dev"
-    commit-message:
-      prefix: "👷" # prefix with gitmoji
-      include: "scope" # list updated dependencies in message
-    assignees:
-      - "manuel-rw"
+# This shit is fucking annoying turned it off lmao
+
 
